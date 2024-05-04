@@ -12,7 +12,9 @@ cd
 install
 pip install opencv-python `<br>`
 
-pip install pytesseract
+pip install pytesseract`<br>`
+
+pip install PyMuPDF
 
 ### NOTE
 
@@ -24,6 +26,6 @@ git commit -m "Add a specific, meaningful commit message".`<br>`
 git pull origin main.`<br>`
 4.Code Reviews.`<br>`
 git push origin [branch-name] . `<br>` 5. Resolve Conflicts.`<br>`
-REMEMBER TO HANDLE CONFLICTS FIRST BEFORE MERGING`<br>` 6. Merge Changes.`<br>`
-git checkout main`<br>`
+REMEMBER TO HANDLE CONFLICTS FIRST BEFORE MERGING `<br>` 6. Merge Changes.`<br>`
+git checkout main `<br>`
 git merge [branch-name]`<br>`

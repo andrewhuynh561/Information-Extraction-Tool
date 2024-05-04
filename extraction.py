@@ -39,5 +39,5 @@ data = pytesseract.image_to_string(image, lang='eng',config='--psm 6')
 print(data)
 
 
-cv2.imwrite('image7.png', image)
+cv2.imwrite('image.png', image)
 cv2.waitKey()
