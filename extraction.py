@@ -9,54 +9,56 @@ import pandas as pd
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-def extract_text_from_pdf(pdf_file_path):
-    # Open the PDF file
-    pdf_document = fitz.open(pdf_file_path)
-    
-    # Initialise text and table data
-    text_data = []
+def extract_table(pdf_path, target_header):
     table_data = []
-
-    # Iterate over each page in the PDF document
-    for page_num in range(pdf_document.page_count):
-        page = pdf_document.load_page(page_num)
-        
-        # Extract text from the page
-        text = page.get_text()
-        text_data.append(text)
-        
-        # Extract tables from the page using pdfplumber
-        with pdfplumber.open(pdf_file_path) as pdf:
-            for page in pdf.pages:
-                tables = page.extract_tables()
-                for table in tables:
+    with pdfplumber.open(pdf_path) as pdf:
+        for page_num, page in enumerate(pdf.pages):
+            print(f"Extracting tables from page {page_num + 1} with header containing '{target_header}'")
+            tables = page.extract_tables()
+            for table in tables:
+                # get header of table
+                headers = table[0]  
+                # Removing none in title line
+                remove_headers = []
+                for header in headers:
+                    if header is not None:
+                        Header = str(header).strip()
+                        remove_headers.append(Header)
+               
+                # Check if target header is in the headers list
+                if target_header in remove_headers:
+                    # get data after the header
+                    data = table[1:] 
+                    print(f"Table Headers: {remove_headers}")
+                    print(f"Table Data: {data}")
                     df = pd.DataFrame(table[1:], columns=table[0])
                     table_data.append(df)
-    
-    # Close the PDF file
-    pdf_document.close()
-
-    return text_data, table_data
+               
+    return table_data
 
 def upload_file():
     file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
     if file_path:
-        text_data, table_data = extract_text_from_pdf(file_path)
-        # Process and display text and table data as needed
-        print("Text Data:")
-        for text in text_data:
-            print(text)
+        table_data = extract_table(file_path,target_header)
         print("\nTable Data:")
         for table in table_data:
             print(table)
-        
-# Create the main window
-root = tk.Tk()
-root.title("PDF Text and Table Extractor")
 
-# Create a button for uploading a file
-upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
-upload_button.pack(pady=20)
 
-# Start the Tkinter event loop
-root.mainloop()
+# Key word for title table
+target_header = 'FOOTING SCHEDULE'
+
+def main():
+    # Create the main window
+    root = tk.Tk()
+    root.title("Table Extractor")
+
+    # Create a button for uploading a file
+    upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
+    upload_button.pack(pady=20)
+
+    # Start the Tkinter event loop
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
