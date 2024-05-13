@@ -24,29 +24,33 @@ def extract_table(pdf_path, target_header):
                     if header is not None:
                         Header = str(header).strip()
                         remove_headers.append(Header)
-               
-                # Check if target header is in the headers list
-                if target_header in remove_headers:
+                # checking the header with remove none in the target hearders
+                valid_header = False
+                for header in target_headers:
+                    if header in remove_headers:
+                        valid_header = True
+                        break
+                # true
+                if valid_header:
                     # get data after the header
-                    data = table[1:] 
+                    data = table[1:]  
                     print(f"Table Headers: {remove_headers}")
                     print(f"Table Data: {data}")
                     df = pd.DataFrame(table[1:], columns=table[0])
                     table_data.append(df)
-               
     return table_data
 
 def upload_file():
     file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
     if file_path:
-        table_data = extract_table(file_path,target_header)
+        table_data = extract_table(file_path,target_headers)
         print("\nTable Data:")
         for table in table_data:
             print(table)
 
 
 # Key word for title table
-target_header = 'FOOTING SCHEDULE'
+target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE']
 
 def main():
     # Create the main window
