@@ -1,43 +1,62 @@
+import tkinter as tk
+from tkinter import filedialog
+import fitz  # PyMuPDF
 import cv2
 import pytesseract
 import numpy as np
-#
-# The first process is to segment any type of engineering drawing into two different images. The drawing image and the table image. The table image is later going to be used to extract the data.
-
-# To start the segmentation process, we created a function defined as diagram_segmentation(). Next the image was read using cv2 and converted into grayscale. After applying the OTSU thresholding, the image was inverted which was done for easier detection drawing.
-
+import pdfplumber
+import pandas as pd
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Load image, grayscale, Otsu's threshold
-image = cv2.imread('20.png')
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+def extract_text_from_pdf(pdf_file_path):
+    # Open the PDF file
+    pdf_document = fitz.open(pdf_file_path)
+    
+    # Initialise text and table data
+    text_data = []
+    table_data = []
 
-# Repair horizontal table lines 
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,1))
-thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
+    # Iterate over each page in the PDF document
+    for page_num in range(pdf_document.page_count):
+        page = pdf_document.load_page(page_num)
+        
+        # Extract text from the page
+        text = page.get_text()
+        text_data.append(text)
+        
+        # Extract tables from the page using pdfplumber
+        with pdfplumber.open(pdf_file_path) as pdf:
+            for page in pdf.pages:
+                tables = page.extract_tables()
+                for table in tables:
+                    df = pd.DataFrame(table[1:], columns=table[0])
+                    table_data.append(df)
+    
+    # Close the PDF file
+    pdf_document.close()
 
-# Remove horizontal lines
-horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (50,2))
-detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
-cnts = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-for c in cnts:
-    cv2.drawContours(image, [c], -1, (255,255,255), 9)
+    return text_data, table_data
 
-# Remove vertical lines
-vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2,55))
-detect_vertical = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
-cnts = cv2.findContours(detect_vertical, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-for c in cnts:
-    cv2.drawContours(image, [c], -1, (255,255,255), 9)
+def upload_file():
+    file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
+    if file_path:
+        text_data, table_data = extract_text_from_pdf(file_path)
+        # Process and display text and table data as needed
+        print("Text Data:")
+        for text in text_data:
+            print(text)
+        print("\nTable Data:")
+        for table in table_data:
+            print(table)
+        
+# Create the main window
+root = tk.Tk()
+root.title("PDF Text and Table Extractor")
 
-# Perform OCR
-data = pytesseract.image_to_string(image, lang='eng',config='--psm 6')
-print(data)
+# Create a button for uploading a file
+upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
+upload_button.pack(pady=20)
 
-
-cv2.imwrite('image.png', image)
-cv2.waitKey()
+# Start the Tkinter event loop
+root.mainloop()
