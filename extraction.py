@@ -40,6 +40,12 @@ def extract_table(pdf_path, target_header):
                     table_data.append(df)
     return table_data
 
+# export to excel funtion
+def export_to_excel (table_data, excel_path):
+     with pd.ExcelWriter(excel_path) as writer:
+        for i, table_df in enumerate(table_data):
+            table_df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
+
 def upload_file():
     file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
     if file_path:
