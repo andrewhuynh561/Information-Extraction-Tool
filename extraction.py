@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import fitz  # PyMuPDF
 import cv2
 import pytesseract
@@ -47,14 +47,31 @@ def export_to_excel (table_data, excel_path):
             table_df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
 
 def upload_file():
-    file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
-    if file_path:
-        table_data = extract_table(file_path,target_headers)
-        print("\nTable Data:")
-        for table in table_data:
-            print(table)
+   
+    file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
 
+    if file_paths:
+        combined_table = []  # List to store all tables extracted from the PDFs
 
+        # Loop through each selected file
+        for file_path in file_paths:
+            # Extract tables from the current PDF file
+            table_data = extract_table(file_path, target_headers)
+            combined_table.extend(table_data)  # Add the extracted tables 
+        
+        # Check if any tables were found
+        if combined_table:
+            # Open a file d select the save excel file path
+            excel_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+            if excel_path:
+                export_to_excel(combined_table, excel_path)
+                # Show a success message
+                messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
+        else:
+            # Show a message if no matching tables were found
+            messagebox.showinfo("No Tables Found", "No tables found in PDF files.")
+    
+   
 # Key word for title table
 target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE']
 
