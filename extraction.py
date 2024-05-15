@@ -84,7 +84,20 @@ def main():
     upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
     upload_button.pack(pady=20)
 
-    # Start the Tkinter event loop
+    width = 300
+    height = 200
+
+    # get the screen dimension
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    # find the center point
+    center_x = int(screen_width/2 - width / 2)
+    center_y = int(screen_height/2 - height / 2)
+
+    # set the position of the window to the center of the screen
+    root.geometry(f'{width}x{height}+{center_x}+{center_y}')
+
+
     root.mainloop()
 
 if __name__ == "__main__":
