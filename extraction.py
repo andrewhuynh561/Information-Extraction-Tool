@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
-import fitz  # PyMuPDF
+from tkinter import Label, filedialog, messagebox
 import cv2
 import pytesseract
 import numpy as np
@@ -73,13 +72,13 @@ def upload_file():
     
    
 # Key word for title table
-target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE']
+target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE']
 
 def main():
     # Create the main window
     root = tk.Tk()
     root.title("Table Extractor")
-
+    lbl = Label(root, text="Hello")
     # Create a button for uploading a file
     upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
     upload_button.pack(pady=20)
