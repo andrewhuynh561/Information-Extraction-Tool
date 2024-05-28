@@ -12,20 +12,8 @@ cd
 install
 pip install opencv-python `<br>`
 
-pip install pytesseract`<br>`
+pip install pytesseract `<br>`
 
-pip install PyMuPDF
+pip install pdfplumber
 
-### NOTE
-
-1.Work on your branch.`<br>`
-git checkout -b [branch-name].`<br>`
-2.Then regular commit.`<br>`
-git commit -m "Add a specific, meaningful commit message".`<br>`
-3.Pull change regularly.`<br>`
-git pull origin main.`<br>`
-4.Code Reviews.`<br>`
-git push origin [branch-name] . `<br>` 5. Resolve Conflicts.`<br>`
-REMEMBER TO HANDLE CONFLICTS FIRST BEFORE MERGING `<br>` 6. Merge Changes.`<br>`
-git checkout main `<br>`
-git merge [branch-name]`<br>`
+pip install ultralyticsplus==0.0.28 ultralytics==8.0.43
