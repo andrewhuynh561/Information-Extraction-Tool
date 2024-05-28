@@ -17,3 +17,6 @@ pip install pytesseract `<br>`
 pip install pdfplumber
 
 pip install ultralyticsplus==0.0.28 ultralytics==8.0.43
+
+YOLOv8
+([foduucom/table-detection-and-extraction · Hugging Face](https://huggingface.co/foduucom/table-detection-and-extraction))
