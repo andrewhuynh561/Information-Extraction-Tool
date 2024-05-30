@@ -1,4 +1,6 @@
 from ultralyticsplus import YOLO, render_result
+import os
+import cv2
 
 # load model
 model = YOLO('foduucom/table-detection-and-extraction')
@@ -12,16 +14,24 @@ model.overrides['max_det'] = 1000  # maximum number of detections per image
 # set image
 image = 'images/page_1.png'
 
-# perform inference
-results = model.predict(image,save_crop=True)
+# perform inference and save croped images
+results = model.predict(image)
+# results = model.predict(image,save_crop=True)
+image = cv2.imread(image)
+#print coordinates
+print("Detected boxes coordinates:")
+for i,box in enumerate(results[0].boxes):
+    x1, y1, x2, y2 = map(int,box.xyxy[0])  # Extract coordinates
+    print(f"Box: ({x1}, {y1}), ({x2}, {y2})")
+    #getting cropped image by using x,y coordinate
+    cropped_image=image[y1:y2,x1:x2]
 
-# #print coordinates
-# print("Detected boxes coordinates:")
-# for box in results[0].boxes:
-#     x1, y1, x2, y2 = box.xyxy[0]  # Extract coordinates
-#     print(f"Box: ({x1}, {y1}), ({x2}, {y2})")
+    image_path=os.path.join('images',"cropped_image_{i+1}.png")
+    cv2.imwrite(image_path,cropped_image)
+    
+
 
 # # observe results
 # print(results[0].boxes)
-render = render_result(model=model, image=image, result=results[0])
-render.show()
+# render = render_result(model=model, image=image, result=results[0])
+# render.show()
