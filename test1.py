@@ -55,9 +55,25 @@ lines = extracted_text.split('\n')
 # Find the index of the line that contains the keyword "FOOTING SCHEDULE"
 start_index = None
 for i, line in enumerate(lines):
-    if "FOOTING SCHEDULE" in line:
+    if 'FOOTING SCHEDULE' in line:
         start_index = i
         break
+    elif 'FOUNDATION SCHEDULE' in line:
+        start_index = i
+        break
+    elif 'GROUND FOOTING SCHEDULE' in line:
+        start_index = i
+        break
+    elif 'WALL SCHEDULE' in line:
+        start_index = i
+        break
+    elif 'RAFT FOOTING SCHEDULE' in line:
+        start_index = i
+        break
+    elif 'SLAB BEAM SCHEDULE' in line:
+        start_index = i
+        break
+    
 
 # Extract the lines following the "FOOTING SCHEDULE" keyword
 table_lines = lines[start_index:]
@@ -73,6 +89,7 @@ table_lines = filtered
 
 # Combine the relevant lines to form the table data
 table_data = "\n".join(table_lines)
+target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE']
 
 # Display the extracted table data
 print(table_lines)

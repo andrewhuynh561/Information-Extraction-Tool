@@ -20,7 +20,7 @@ def convert_to_images(pdf_path, output_path, resolution=300):
             print(f"Saved  {page_num + 1} as image {image_path}")
 
 # Example usage
-pdf_path = "dataset/2-6 GWYNNE STREET, CREMORNE - FOOTINGS.pdf"
+pdf_path = "dataset/244_v1.pdf"
 output_path = "images"
 convert_to_images(pdf_path, output_path, resolution=300)
 
