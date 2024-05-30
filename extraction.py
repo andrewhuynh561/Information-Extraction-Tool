@@ -57,6 +57,7 @@ def upload_file():
             # Extract tables from the current PDF file
             table_data = extract_table(file_path, target_headers)
             combined_table.extend(table_data)  # Add the extracted tables 
+            print(table_data)
         
         # Check if any tables were found
         if combined_table:

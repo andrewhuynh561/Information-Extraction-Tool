@@ -41,9 +41,38 @@ results = model.predict(image,save_crop=True)
 # render.show()
 
 cropped_image_path="runs/detect/predict/crops/bordered/page_12.jpg"
+
 load_image=Image.open(cropped_image_path)
 
 #using pytesseract to extract text from image
 extracted_text= pytesseract.image_to_string(load_image)
 
 print(extracted_text)
+
+# Split the text into lines
+lines = extracted_text.split('\n')
+
+# Find the index of the line that contains the keyword "FOOTING SCHEDULE"
+start_index = None
+for i, line in enumerate(lines):
+    if "FOOTING SCHEDULE" in line:
+        start_index = i
+        break
+
+# Extract the lines following the "FOOTING SCHEDULE" keyword
+table_lines = lines[start_index:]
+
+# Remove any empty lines
+# Create a new list to store non-empty lines
+filtered = []
+for line in table_lines:
+    if line.strip():  # Check if the line is not empty after removing  whitespace
+        filtered.append(line)
+
+table_lines = filtered
+
+# Combine the relevant lines to form the table data
+table_data = "\n".join(table_lines)
+
+# Display the extracted table data
+print(table_lines)
