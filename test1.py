@@ -2,9 +2,38 @@ from ultralyticsplus import YOLO, render_result
 import os
 import cv2
 import pytesseract
+import pdfplumber
 from PIL import Image
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
+
+
+
+def convert_to_images(pdf_path, resolution=300):
+    # Get the directory of the PDF file
+    # output_dir = os.path.dirname(pdf_path)
+    
+
+    with pdfplumber.open(pdf_path) as pdf:
+        # Iterate over each page in the PDF
+        for page_num, page in enumerate(pdf.pages):
+            image = page.to_image(resolution=resolution).original
+            
+            # # Define the path to save the image
+            image_path = os.path.join( f"page_{page_num + 1}.png")
+            # Save the image
+            image.save(image_path)
+
+            # # Add the image path to the list
+            # image_paths.append(image_path)
+
+            # # Print a confirmation message
+            # print(f"Saved page {page_num + 1} as image {image_path}")
+
+    return image_path
+
+pdf_path = "dataset/2-6 GWYNNE STREET, CREMORNE - FOOTINGS.pdf"
+image_path = convert_to_images(pdf_path, resolution=300)
 
 # load model
 model = YOLO('foduucom/table-detection-and-extraction')
@@ -16,7 +45,8 @@ model.overrides['agnostic_nms'] = False  # NMS class-agnostic
 model.overrides['max_det'] = 1000  # maximum number of detections per image
 
 # set image
-image = 'images/page_1.png'
+image = image_path
+# image = 'images/page_1.png'
 
 # perform inference and save croped images
 # results = model.predict(image)
@@ -41,6 +71,7 @@ results = model.predict(image,save_crop=True)
 # render.show()
 
 cropped_image_path="runs/detect/predict/crops/bordered/page_12.jpg"
+# cropped_image_path="cropped_table_4.png"
 
 load_image=Image.open(cropped_image_path)
 
@@ -73,6 +104,12 @@ for i, line in enumerate(lines):
     elif 'SLAB BEAM SCHEDULE' in line:
         start_index = i
         break
+    elif 'STRIP FOOTING SCHEDULE (BEAM BASED)' in line:
+        start_index = i
+        break
+    elif'STRUCTURAL FOUNDATION SCHEDULE - PAD FOOTINGS' in lines:
+        start_index =i
+        break
     
 
 # Extract the lines following the "FOOTING SCHEDULE" keyword
@@ -93,3 +130,7 @@ target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCH
 
 # Display the extracted table data
 print(table_lines)
+
+
+# Delete the image file after processing
+os.remove(image_path)
