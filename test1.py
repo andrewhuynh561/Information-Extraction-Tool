@@ -7,29 +7,19 @@ from PIL import Image
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
-
-
 def convert_to_images(pdf_path, resolution=300):
     # Get the directory of the PDF file
     # output_dir = os.path.dirname(pdf_path)
-    
-
     with pdfplumber.open(pdf_path) as pdf:
-        # Iterate over each page in the PDF
-        for page_num, page in enumerate(pdf.pages):
+        for  page in (pdf.pages):
             image = page.to_image(resolution=resolution).original
-            
             # # Define the path to save the image
-            image_path = os.path.join( f"page_{page_num + 1}.png")
+            image_path = os.path.join( f"converted.png")
             # Save the image
             image.save(image_path)
 
             # # Add the image path to the list
             # image_paths.append(image_path)
-
-            # # Print a confirmation message
-            # print(f"Saved page {page_num + 1} as image {image_path}")
-
     return image_path
 
 pdf_path = "dataset/2-6 GWYNNE STREET, CREMORNE - FOOTINGS.pdf"
@@ -70,7 +60,7 @@ results = model.predict(image,save_crop=True)
 # render = render_result(model=model, image=image, result=results[0])
 # render.show()
 
-cropped_image_path="runs/detect/predict/crops/bordered/page_12.jpg"
+cropped_image_path="runs/detect/predict/crops/bordered/converted2.jpg"
 # cropped_image_path="cropped_table_4.png"
 
 load_image=Image.open(cropped_image_path)

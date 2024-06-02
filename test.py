@@ -1,33 +1,117 @@
 import os
 import pdfplumber
 from PIL import Image
+from ultralyticsplus import YOLO
+import pytesseract
+import shutil
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 def convert_to_images(pdf_path, resolution=300):
-    # Get the directory of the PDF file
-    # output_dir = os.path.dirname(pdf_path)
-    
-    image_paths = []
-
     with pdfplumber.open(pdf_path) as pdf:
-        # Iterate over each page in the PDF
-        for page_num, page in enumerate(pdf.pages):
+        for page in pdf.pages:
             image = page.to_image(resolution=resolution).original
-            
-            # # Define the path to save the image
-            image_path = os.path.join( f"page_{page_num + 1}.png")
-            # Save the image
+            image_path = os.path.join("converted.png")
             image.save(image_path)
+    return image_path
 
-            # # Add the image path to the list
-            image_paths.append(image_path)
+def process_image(image_path):
+    # load model
+    model = YOLO('foduucom/table-detection-and-extraction')
 
-            # # Print a confirmation message
-            # print(f"Saved page {page_num + 1} as image {image_path}")
+    # set model parameters
+    model.overrides['conf'] = 0.25  # NMS confidence threshold
+    model.overrides['iou'] = 0.45  # NMS IoU threshold
+    model.overrides['agnostic_nms'] = False  # NMS class-agnostic
+    model.overrides['max_det'] = 1000  # maximum number of detections per image
 
-    return image_paths
-# Example usage
-pdf_path = "dataset/578-580 RIVERSDALE ROAD, CAMBERWELL - FOOTINGS.pdf"
-image_paths = convert_to_images(pdf_path, resolution=300)
+    # perform inference and save cropped images
+    results = model.predict(image_path, save_crop=True)
 
-# Now you can use image_paths for the next step
-print(image_paths)
+    # Directory where cropped images are saved
+    crops_dir = "runs/detect/predict/crops/"
+
+    # List all cropped images
+    cropped_image_paths = []
+    for root, dirs, files in os.walk(crops_dir):
+        for file in files:
+            if file.endswith((".png", ".jpg", ".jpeg")):
+                path=os.path.join(root, file)
+                cropped_image_paths.append(path)
+
+    extracted_texts = []
+
+    for cropped_image_path in cropped_image_paths:
+        load_image = Image.open(cropped_image_path)
+
+        # Using pytesseract to extract text from image
+        extracted_text = pytesseract.image_to_string(load_image)
+
+        extracted_texts.append(extracted_text)
+        
+        # Optionally delete the cropped image after processing
+        # os.remove(cropped_image_path)
+    
+    return extracted_texts
+
+def extract_schedule_texts(extracted_texts):
+    for extracted_text in extracted_texts:
+        # Split the text into lines
+        lines = extracted_text.split('\n')
+
+        # Find the index of the line that contains the keyword "FOOTING SCHEDULE"
+        start_index = None
+        for i, line in enumerate(lines):
+            if 'FOOTING SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'FOUNDATION SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'GROUND FOOTING SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'WALL SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'RAFT FOOTING SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'SLAB BEAM SCHEDULE' in line:
+                start_index = i
+                break
+            elif 'STRIP FOOTING SCHEDULE (BEAM BASED)' in line:
+                start_index = i
+                break
+            elif'STRUCTURAL FOUNDATION SCHEDULE - PAD FOOTINGS' in lines:
+                start_index =i
+                break
+            
+        if start_index is not None:
+            # Extract the lines following the "FOOTING SCHEDULE" keyword
+            table_lines = lines[start_index:]
+
+            # Remove any empty lines
+            # Create a new list to store non-empty lines
+            tables = []
+            for line in table_lines:
+                if line.strip():  # Check if the line is not empty after removing  whitespace
+                    tables.append(line)
+
+            table_lines = tables
+
+            # Combine the relevant lines to form the table data
+            table_data = "\n".join(table_lines)
+            print(table_data)
+
+pdf_path = "dataset/244 LOWER HEIDELBERG ROAD, IVANHOE EAST STACKER - FOOTINGS.pdf"
+image_path = convert_to_images(pdf_path, resolution=300)
+extracted_texts = process_image(image_path)
+
+extract_schedule_texts(extracted_texts)
+
+# Delete the main image file after processing
+os.remove(image_path)
+# Delete the entire runs directory
+shutil.rmtree("runs")
+
