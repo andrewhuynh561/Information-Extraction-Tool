@@ -119,7 +119,7 @@ table_data = "\n".join(table_lines)
 target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE']
 
 # Display the extracted table data
-print(table_lines)
+print(table_data)
 
 
 # Delete the image file after processing

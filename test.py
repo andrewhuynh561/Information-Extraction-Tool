@@ -3,6 +3,7 @@ import pdfplumber
 from PIL import Image
 from ultralyticsplus import YOLO
 import pytesseract
+import pandas as pd
 import shutil
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -36,8 +37,7 @@ def process_image(image_path):
     for root, dirs, files in os.walk(crops_dir):
         for file in files:
             if file.endswith((".png", ".jpg", ".jpeg")):
-                path=os.path.join(root, file)
-                cropped_image_paths.append(path)
+                cropped_image_paths.append(os.path.join(root, file))
 
     extracted_texts = []
 
@@ -86,23 +86,42 @@ def extract_schedule_texts(extracted_texts):
             elif'STRUCTURAL FOUNDATION SCHEDULE - PAD FOOTINGS' in lines:
                 start_index =i
                 break
-            
+
         if start_index is not None:
-            # Extract the lines following the "FOOTING SCHEDULE" keyword
-            table_lines = lines[start_index:]
-
+            # Extract the lines following the target header
+            table_lines = lines[start_index :]
+            
             # Remove any empty lines
-            # Create a new list to store non-empty lines
-            tables = []
-            for line in table_lines:
-                if line.strip():  # Check if the line is not empty after removing  whitespace
-                    tables.append(line)
+            table_lines = [line for line in table_lines if line.strip()]
+        
+            # Determine headers and parse the table data
+            headers = table_lines[0].split()
+            # table_data = [line.split() for line in table_lines[1:]]
+            # Initialize an empty list to store the table data
+            table_data = []
 
-            table_lines = tables
+            # Iterate over each line in table_lines starting from the second line (skipping the header line)
+            for line in table_lines[1:]:
+                # Split the line into individual values based on whitespace
+                values = line.split()
+                
+                # Append the list of values to the table_data list
+                table_data.append(values)
 
-            # Combine the relevant lines to form the table data
-            table_data = "\n".join(table_lines)
-            print(table_data)
+            print(headers)
+            # Adjust rows to have the same number of columns as headers
+            for row in table_data:
+                while len(row) < len(headers):
+                    row.append(" ")
+                while len(row) > len(headers):
+                    headers.append(" ")
+            
+            # Create a DataFrame from the parsed table data
+            df = pd.DataFrame(table_data, columns=headers)
+            
+            print(f"Table Headers: {headers}")
+            print(f"Table Data: \n{df}")
+        
 
 pdf_path = "dataset/244 LOWER HEIDELBERG ROAD, IVANHOE EAST STACKER - FOOTINGS.pdf"
 image_path = convert_to_images(pdf_path, resolution=300)
@@ -112,6 +131,4 @@ extract_schedule_texts(extracted_texts)
 
 # Delete the main image file after processing
 os.remove(image_path)
-# Delete the entire runs directory
 shutil.rmtree("runs")
-
