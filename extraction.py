@@ -116,6 +116,9 @@ def extract_schedule_texts(extracted_texts):
             elif 'SLAB BEAM SCHEDULE' in line:
                 start_index = i
                 break
+            elif 'PAD FOOTING SCHEDULE' in line:
+                start_index = i
+                break
             elif 'STRIP FOOTING SCHEDULE (BEAM BASED)' in line:
                 start_index = i
                 break
@@ -164,46 +167,76 @@ def extract_schedule_texts(extracted_texts):
 
 
 # export to excel funtion
-def export_to_excel (table_data, excel_path):
-     with pd.ExcelWriter(excel_path) as writer:
-        for i, table_df in enumerate(table_data):
-            table_df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
-
+# def export_to_excel (table_data, excel_path):
+#      writer="extracted_table.xlsx"
+#      with pd.ExcelWriter(excel_path) as writer:
+#         for i, table_df in enumerate(table_data):
+#             table_df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
 def upload_file():
-   
-    file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+    folder_path = filedialog.askdirectory()
+    if not folder_path:
+        return
 
-    if file_paths:
-        combined_table = []  # List to store all tables extracted from the PDFs
-
-        # Loop through each selected file
-        for file_path in file_paths:
-            # Extract tables from the current PDF file
+    combined_table = {}
+    
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith(".pdf"):
+            file_path = os.path.join(folder_path, file_name)
             table_data = extract_table(file_path, target_headers)
             if not table_data:
                 image_path = convert_to_images(file_path, resolution=300)
                 extracted_texts = process_image(image_path)
                 table_data=extract_schedule_texts(extracted_texts)
-            combined_table.extend(table_data)  # Add the extracted tables 
-            print(table_data)
-        # Delete the main image file after processing
-        os.remove(image_path)
-        shutil.rmtree("runs")
-        # Check if any tables were found
-        if combined_table:
-            # Open a file d select the save excel file path
-            excel_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
-            if excel_path:
-                export_to_excel(combined_table, excel_path)
-                # Show a success message
-                messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
-        else:
-            # Show a message if no matching tables were found
-            messagebox.showinfo("No Tables Found", "No tables found in PDF files.")
+                # Delete the main image file after processing 
+                os.remove(image_path)
+                shutil.rmtree("runs")
+                    
+            combined_table[file_name] = pd.concat(table_data)
+   
+
+    if combined_table:
+        excel_path = os.path.join(folder_path, "extracted_data.xlsx")
+        with pd.ExcelWriter(excel_path) as writer:
+            for sheet_name, table_df in combined_table.items():
+                table_df.to_excel(writer, sheet_name=sheet_name[:31], index=False)  # Excel sheet name limit is 31 characters
+        messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
+    else:
+        messagebox.showinfo("No Tables Found", "No tables found in the selected folder.")
+# def upload_file():
+   
+#     file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+
+#     if file_paths:
+#         combined_table = []  # List to store all tables extracted from the PDFs
+
+#         # Loop through each selected file
+#         for file_path in file_paths:
+#             # Extract tables from the current PDF file
+#             table_data = extract_table(file_path, target_headers)
+#             if not table_data:
+#                 image_path = convert_to_images(file_path, resolution=300)
+#                 extracted_texts = process_image(image_path)
+#                 table_data=extract_schedule_texts(extracted_texts)
+#             combined_table.extend(table_data)  # Add the extracted tables 
+#             print(table_data)
+#         # Delete the main image file after processing
+#         os.remove(image_path)
+#         shutil.rmtree("runs")
+#         # Check if any tables were found
+#         if combined_table:
+#             # Open a file d select the save excel file path
+#             excel_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+#             if excel_path:
+#                 export_to_excel(combined_table, excel_path)
+#                 # Show a success message
+#                 messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
+#         else:
+#             # Show a message if no matching tables were found
+#             messagebox.showinfo("No Tables Found", "No tables found in PDF files.")
     
    
 # Key word for title table
-target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE']
+target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE','PAD FOOTING SCHEDULE','STRIP FOOTING SCHEDULE (BEAM BASED)','STRIP FOOTING SCHEDULE (BEAM BASED)']
 
 def main():
     # Create the main window
