@@ -121,9 +121,12 @@ def extract_schedule_texts(extracted_texts):
             
             print(f"Table Headers: {headers}")
             print(f"Table Data: \n{df}")
+
+    return table_data 
         
 
-pdf_path = "dataset/244 LOWER HEIDELBERG ROAD, IVANHOE EAST STACKER - FOOTINGS.pdf"
+# pdf_path = "dataset/244 LOWER HEIDELBERG ROAD, IVANHOE EAST STACKER - FOOTINGS.pdf"
+pdf_path = "dataset/244_v1.pdf"
 image_path = convert_to_images(pdf_path, resolution=300)
 extracted_texts = process_image(image_path)
 
