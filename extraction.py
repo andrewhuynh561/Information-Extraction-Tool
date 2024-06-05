@@ -63,6 +63,16 @@ def process_image(image_path):
 
     # perform inference and save cropped images
     results = model.predict(image_path, save_crop=True)
+    # image = cv2.imread(image)
+    #print coordinates
+      # for i,box in enumerate(results[0].boxes):
+    #     x1, y1, x2, y2 = map(int,box.xyxy[0])  # Extract coordinates
+    #     print(f"Box: ({x1}, {y1}), ({x2}, {y2})")
+    #     #getting cropped image by using x,y coordinate
+    #     cropped_image=image[y1:y2,x1:x2]
+
+    #     image_path=os.path.join('images',f"cropped_image_{i+1}.png")
+    #     cv2.imwrite(image_path,cropped_image)
 
     # Directory where cropped images are saved
     crops_dir = "runs/detect/predict/crops/"
@@ -78,15 +88,10 @@ def process_image(image_path):
 
     for cropped_image_path in cropped_image_paths:
         load_image = Image.open(cropped_image_path)
-
         # Using pytesseract to extract text from image
         extracted_text = pytesseract.image_to_string(load_image)
-
         extracted_texts.append(extracted_text)
-        
-        # Optionally delete the cropped image after processing
-        # os.remove(cropped_image_path)
-    
+
     return extracted_texts
 
 def extract_schedule_texts(extracted_texts):
@@ -94,7 +99,6 @@ def extract_schedule_texts(extracted_texts):
     for extracted_text in extracted_texts:
         # Split the text into lines
         lines = extracted_text.split('\n')
-
         # Find the index of the line that contains the keyword "FOOTING SCHEDULE"
         start_index = None
         for i, line in enumerate(lines):
@@ -132,18 +136,14 @@ def extract_schedule_texts(extracted_texts):
             
             # Remove any empty lines
             table_lines = [line for line in table_lines if line.strip()]
-        
             # Determine headers and parse the table data
             headers = table_lines[0].split()
-            # table_data = [line.split() for line in table_lines[1:]]
-            # Initialize an empty list to store the table data
+      
             data = []
-
             # Iterate over each line in table_lines starting from the second line (skipping the header line)
             for line in table_lines[1:]:
                 # Split the line into individual values based on whitespace
-                values = line.split()
-                
+                values = line.split() 
                 # Append the list of values to the data list
                 data.append(values)
 
@@ -164,14 +164,6 @@ def extract_schedule_texts(extracted_texts):
             table_data.append(df)
     return table_data
         
-
-
-# export to excel funtion
-# def export_to_excel (table_data, excel_path):
-#      writer="extracted_table.xlsx"
-#      with pd.ExcelWriter(excel_path) as writer:
-#         for i, table_df in enumerate(table_data):
-#             table_df.to_excel(writer, sheet_name=f"Table_{i+1}", index=False)
 def upload_file():
     folder_path = filedialog.askdirectory()
     if not folder_path:
@@ -202,38 +194,6 @@ def upload_file():
         messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
     else:
         messagebox.showinfo("No Tables Found", "No tables found in the selected folder.")
-# def upload_file():
-   
-#     file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
-
-#     if file_paths:
-#         combined_table = []  # List to store all tables extracted from the PDFs
-
-#         # Loop through each selected file
-#         for file_path in file_paths:
-#             # Extract tables from the current PDF file
-#             table_data = extract_table(file_path, target_headers)
-#             if not table_data:
-#                 image_path = convert_to_images(file_path, resolution=300)
-#                 extracted_texts = process_image(image_path)
-#                 table_data=extract_schedule_texts(extracted_texts)
-#             combined_table.extend(table_data)  # Add the extracted tables 
-#             print(table_data)
-#         # Delete the main image file after processing
-#         os.remove(image_path)
-#         shutil.rmtree("runs")
-#         # Check if any tables were found
-#         if combined_table:
-#             # Open a file d select the save excel file path
-#             excel_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
-#             if excel_path:
-#                 export_to_excel(combined_table, excel_path)
-#                 # Show a success message
-#                 messagebox.showinfo("Success", "Tables extracted and exported to Excel successfully!")
-#         else:
-#             # Show a message if no matching tables were found
-#             messagebox.showinfo("No Tables Found", "No tables found in PDF files.")
-    
    
 # Key word for title table
 target_headers = ['FOOTING SCHEDULE', 'FOUNDATION SCHEDULE', 'GROUND FOOTING SCHEDULE', 'WALL SCHEDULE','PAD FOOTING SCHEDULE','STRIP FOOTING SCHEDULE (BEAM BASED)','STRIP FOOTING SCHEDULE (BEAM BASED)']
@@ -244,7 +204,7 @@ def main():
     root.title("Table Extractor")
     lbl = Label(root, text="Hello")
     # Create a button for uploading a file
-    upload_button = tk.Button(root, text="Upload PDF File", command=upload_file)
+    upload_button = tk.Button(root, text="Select Folder", command=upload_file)
     upload_button.pack(pady=20)
 
     width = 300
@@ -259,7 +219,6 @@ def main():
 
     # set the position of the window to the center of the screen
     root.geometry(f'{width}x{height}+{center_x}+{center_y}')
-
 
     root.mainloop()
 
