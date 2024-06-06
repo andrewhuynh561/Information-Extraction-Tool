@@ -1,28 +1,39 @@
 # Information-Extraction-Tool
 
-AI Tool can automatically recognise and extract the elements of each drawing and their associated textual annotations in PDF documents
+Welcome to the Information-Extraction-Tool! This AI-powered tool can automatically recognize and extract elements of each drawing and their associated textual annotations in PDF documents. Perfect for streamlining your workflow and enhancing productivity.
 
 ## Initial Project Setup
 
-Open terminal to run code with syntax below
-cd
+Follow the steps below to set up and run the project.The sample pdf file from:
+[Cornell-Engineers-Sample-Drawings.pdf (cornellengineers.com.au)](https://www.cornellengineers.com.au/wp-content/uploads/2014/03/Cornell-Engineers-Sample-Drawings.pdf?_gl=1*1nmpisi*_ga*MTUxNjA0NjA3OC4xNzE3NjY3ODcw*_ga_6LNZSCKJL8*MTcxNzY2Nzg2OS4xLjEuMTcxNzY2ODAwMi4wLjAuMA..)
 
 ### Environment Setup
 
-install
-pip install opencv-python `<br>`
+1. Open your terminal.
+2. Navigate to your project directory:
 
-pip install pytesseract `<br>`
+   ```bash
+   cd <your-project-directory>
+   ```
 
-pip install pdfplumber
+3. Install the necessary dependencies:
 
-pip install ultralyticsplus==0.0.28 ultralytics==8.0.43
+   ```bash
+   pip install opencv-python
+   pip install pytesseract
+   pip install pdfplumber
+   pip install ultralyticsplus==0.0.28 ultralytics==8.0.43
+   ```
 
-YOLOv8
-([foduucom/table-detection-and-extraction · Hugging Face](https://huggingface.co/foduucom/table-detection-and-extraction))
+### YOLOv8 Integration
 
-# This CITATION.cff file was generated with https://bit.ly/cffinit
+We leverage YOLOv8 for object detection and extraction, specifically tailored for table detection and extraction. For more details, visit the [Hugging Face repository](https://huggingface.co/foduucom/table-detection-and-extraction).
 
+### Citation
+
+If you use this software, please cite it using the following metadata:
+
+```plaintext
 cff-version: 1.2.0
 title: Ultralytics YOLO
 message: >-
@@ -30,7 +41,6 @@ If you use this software, please cite it using the
 metadata from this file.
 type: software
 authors:
-
 - given-names: Glenn
   family-names: Jocher
   affiliation: Ultralytics
@@ -43,8 +53,11 @@ authors:
   given-names: Jing
   affiliation: Ultralytics
   orcid: 'https://orcid.org/0000-0003-3783-7069'
-  repository-code: 'https://github.com/ultralytics/ultralytics'
-  url: 'https://ultralytics.com'
-  license: AGPL-3.0
-  version: 8.0.0
-  date-released: '2023-01-10'
+repository-code: 'https://github.com/ultralytics/ultralytics'
+url: 'https://ultralytics.com'
+license: AGPL-3.0
+version: 8.0.0
+date-released: '2023-01-10'
+```
+
+Thank you for using Information-Extraction-Tool! If you encounter any issues or have any questions, feel free to reach out.
